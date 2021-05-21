@@ -2,22 +2,13 @@ plugins {
     id 'java'
 }
 
-group 'com.marvelous'
-version '0.0.1-SNAPSHOT'
+version 'unspecified'
 
 repositories {
     mavenCentral()
 }
 
-bootJar {
-    archiveBaseName = 'mvp-app'
-    archiveFileName = 'mvp-app-server.jar'
-    archiveVersion = "0.0.1"
-}
-
 dependencies {
-    implementation project(':api')
-    implementation project(':bridge')
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
 }

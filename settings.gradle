@@ -2,3 +2,5 @@ rootProject.name = 'mvp'
 include 'app'
 include 'api'
 include 'db'
+include 'bridge'
+
