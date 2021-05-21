@@ -1,0 +1,96 @@
+buildscript {
+	ext {
+		springBootVersion = '2.4.5'
+	}
+
+	repositories {
+		mavenCentral()
+		maven { url "https://plugins.gradle.org/m2" }
+	}
+
+	dependencies {
+		classpath "org.springframework.boot:spring-boot-gradle-plugin:2.4.5"
+		classpath "io.spring.gradle:dependency-management-plugin:1.0.11.RELEASE"
+		classpath "com.github.node-gradle:gradle-node-plugin:2.2.3"
+	}
+}
+
+subprojects {
+	apply plugin: 'java'
+	apply plugin: 'org.springframework.boot'
+	apply plugin: 'io.spring.dependency-management'
+	apply plugin: 'com.github.node-gradle.node'
+
+	group = 'com.marvelous'
+	version = '0.0.1-SNAPSHOT'
+
+	sourceCompatibility = '1.8'
+
+	repositories {
+		mavenCentral()
+	}
+
+	dependencies {
+		implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+		implementation 'org.springframework.boot:spring-boot-starter-web'
+		implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+		implementation "mysql:mysql-connector-java:8.0.23"
+
+		compileOnly 'org.projectlombok:lombok'
+		runtimeOnly 'com.h2database:h2'
+		annotationProcessor 'org.projectlombok:lombok'
+		testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	}
+
+	def webappDir = "$rootDir/react/front"
+
+	sourceSets {
+		main {
+			resources {
+				srcDirs = ["$webappDir/build", "$rootDir/app/src/main/resources"]
+			}
+		}
+	}
+
+	node {
+		version = '10.15.1' // 설치할 node 버전
+		yarnVersion = '1.13.0' // 설치할 yarn 버전
+		download = true
+		distBaseUrl = 'https://nodejs.org/dist' // node를 다운받을 수 있는 주소
+		workDir = file("${project.rootDir}/nodejs") // node를 설치할 폴더를 설정
+		yarnWorkDir = file("${project.rootDir}/yarn") // yarn을 설치할 폴더를 설정
+		npmWorkDir = file("${project.rootDir}/npm")
+	}
+
+	processResources {
+		dependsOn "buildReact"
+	}
+
+	task buildReact(type: Exec) {
+		dependsOn "installReact"
+		workingDir "$webappDir"
+		inputs.dir "$webappDir"
+		group = BasePlugin.BUILD_GROUP
+
+		if(System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows')) {
+			commandLine "yarn.cmd", "build"
+		} else {
+			commandLine "yarn", "build"
+		}
+	}
+
+	task installReact(type: Exec) {
+		workingDir "$webappDir"
+		inputs.dir "$webappDir"
+		group = BasePlugin.BUILD_GROUP
+
+		if(System.getProperty("os.name").toLowerCase(Locale.ROOT).contains('windows')) {
+			commandLine "yarn.cmd", "audit", "fix"
+			commandLine "yarn.cmd", "install"
+		} else {
+			commandLine "yarn", "audit", "fix"
+			commandLine "yarn", "install"
+		}
+	}
+
+}
